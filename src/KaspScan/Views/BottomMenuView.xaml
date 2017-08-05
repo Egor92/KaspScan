@@ -3,10 +3,28 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:KaspScan.ViewModels"
+             d:DataContext="{d:DesignInstance viewModels:BottomMenuViewModel}"
              d:DesignHeight="300"
              d:DesignWidth="300"
              mc:Ignorable="d">
     <Grid>
-        <TextBlock>BottomMenuView</TextBlock>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0"
+                    HorizontalAlignment="Left"
+                    Orientation="Horizontal">
+            <Button Content="Mail" />
+            <Button Content="My Kaspersky" />
+            <Button Content="Настройка" />
+            <Button Content="Оставить отзыв" />
+        </StackPanel>
+        <StackPanel Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+            <Button Content="Обновление баз" />
+        </StackPanel>
     </Grid>
 </UserControl>
