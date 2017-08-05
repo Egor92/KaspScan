@@ -112,6 +112,13 @@
     <Compile Include="Constants\NavigationViewNames.cs" />
     <Compile Include="Constants\ReactiveConstants.cs" />
     <Compile Include="Constants\RegionNames.cs" />
+    <Compile Include="Helpers\RandomHelper.cs" />
+    <Compile Include="Helpers\RandomStringHelper.cs" />
+    <Compile Include="Helpers\WordCase.cs" />
+    <Compile Include="Managers\ScanningManager.cs" />
+    <Compile Include="Model\AlgorithmStatus.cs" />
+    <Compile Include="Model\ScanningAlgorithm.cs" />
+    <Compile Include="Model\ScanningAlgorithmStepInfo.cs" />
     <Compile Include="ViewModels\Base\ActiveAwareViewModel.cs" />
     <Compile Include="ViewModels\BottomMenuViewModel.cs" />
     <Compile Include="ViewModels\Base\DisposableViewModel.cs" />
@@ -133,7 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrapper.cs" />
-    <Compile Include="Dependencies\Schedulers.cs" />
+    <Compile Include="Reacitve\Schedulers.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
