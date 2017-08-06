@@ -167,6 +167,11 @@ namespace KaspScan.ViewModels
             if (stepInfo.Status == AlgorithmStatus.NotRunned || timeSpan == null)
                 return "Проверка ещё не запускалась";
 
+            if (stepInfo.Status == AlgorithmStatus.Running ||
+                stepInfo.Status == AlgorithmStatus.Paused ||
+                stepInfo.Status == AlgorithmStatus.Stopped)
+                return null;
+
             var lastScanningTime = timeSpan.Value;
             var hours = lastScanningTime.Hours;
             var minutes = lastScanningTime.Minutes;
@@ -247,9 +252,9 @@ namespace KaspScan.ViewModels
 
         private IDisposable InitializeIsScanningProgressVisibleProperty()
         {
-            return _isScanningProgressVisible = _scanningManager.StepPassed
-                            .Select(GetIsScanningProgressVisible)
-                            .ToProperty(this, x => x.IsScanningProgressVisible, GetIsScanningProgressVisible());
+            return _isScanningProgressVisible = _scanningManager.StepPassed.Select(GetIsScanningProgressVisible)
+                                                                .ToProperty(this, x => x.IsScanningProgressVisible,
+                                                                            GetIsScanningProgressVisible());
         }
 
         private bool GetIsScanningProgressVisible()

@@ -19,28 +19,6 @@
                 <ResourceDictionary Source="pack://application:,,,/Themes/Button.ScanButtonStyle.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/Themes/ProgressBar.CircularProgreeBarStyle.xaml" />
             </ResourceDictionary.MergedDictionaries>
-            <converters:SwitchConverter x:Key="AlgorithmStatusToImageConverter">
-                <cases:EqualsCase Key="{x:Static enums:ScanningResult.NotRunned}">
-                    <cases:EqualsCase.Value>
-                        <ImageBrush ImageSource="pack://application:,,,/Images/not_runned.jpg" />
-                    </cases:EqualsCase.Value>
-                </cases:EqualsCase>
-                <cases:EqualsCase Key="{x:Static enums:ScanningResult.Running}">
-                    <cases:EqualsCase.Value>
-                        <ImageBrush ImageSource="pack://application:,,,/Images/running.jpg" />
-                    </cases:EqualsCase.Value>
-                </cases:EqualsCase>
-                <cases:EqualsCase Key="{x:Static enums:ScanningResult.HasWarnings}">
-                    <cases:EqualsCase.Value>
-                        <ImageBrush ImageSource="pack://application:,,,/Images/warnings.jpg" />
-                    </cases:EqualsCase.Value>
-                </cases:EqualsCase>
-                <cases:EqualsCase Key="{x:Static enums:ScanningResult.HasNoWarnings}">
-                    <cases:EqualsCase.Value>
-                        <ImageBrush ImageSource="pack://application:,,,/Images/no_warnings.jpg" />
-                    </cases:EqualsCase.Value>
-                </cases:EqualsCase>
-            </converters:SwitchConverter>
 
             <converters:SwitchConverter x:Key="IsScanningProgressVisibleConverter">
                 <cases:EqualsCase Key="{x:Static helpers:Booleans.False}">
@@ -79,43 +57,241 @@
     </UserControl.Resources>
 
     <Grid>
+        <Grid.Style>
+            <Style>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsActive}"
+                                 Value="{x:Static helpers:Booleans.True}">
+                        <DataTrigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation d:IsOptimized="True"
+                                                     Storyboard.TargetProperty="(UIElement.Opacity)"
+                                                     From="0"
+                                                     To="1"
+                                                     Duration="0:0:0.4" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.EnterActions>
+                        <DataTrigger.ExitActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation d:IsOptimized="True"
+                                                     Storyboard.TargetProperty="(UIElement.Opacity)"
+                                                     From="1"
+                                                     To="0"
+                                                     Duration="0:0:0.4" />
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.ExitActions>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <Border Background="{Binding ScanningResult, Mode=OneWay, Converter={StaticResource AlgorithmStatusToImageConverter}}">
-            <StackPanel Margin="15,0"
-                        VerticalAlignment="Center">
-                <TextBlock Margin="2"
-                           HorizontalAlignment="Center"
-                           FontSize="24"
-                           FontWeight="Bold"
-                           Foreground="White"
-                           Text="{Binding BoldMessage, Mode=OneWay}"
-                           TextAlignment="Center"
-                           TextWrapping="Wrap" />
-                <TextBlock Margin="2"
-                           HorizontalAlignment="Center"
-                           FontSize="14"
-                           Foreground="White"
-                           Text="{Binding ThinMessage, Mode=OneWay}"
-                           TextAlignment="Center"
-                           TextWrapping="Wrap" />
-                <Button Margin="2"
-                        HorizontalAlignment="Center"
-                        Style="{StaticResource ReportsButtonStyle}"
-                        Visibility="{Binding IsReportsButtonVisible, Mode=OneWay, Converter={converters:BoolToVisibilityConverter}}">
-                    <Button.ContentTemplate>
-                        <DataTemplate>
-                            <TextBlock FontSize="14"
-                                       FontWeight="Bold"
-                                       Text="Отчеты" />
-                        </DataTemplate>
-                    </Button.ContentTemplate>
-                </Button>
-            </StackPanel>
+        <Border x:Name="NotRunnedStatusBorder"
+                Grid.Row="0"
+                Opacity="0">
+            <Border.Style>
+                <Style>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ScanningResult}"
+                                     Value="{x:Static enums:ScanningResult.NotRunned}">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation d:IsOptimized="True"
+                                                         Storyboard.TargetProperty="(UIElement.Opacity)"
+                                                         From="0"
+                                                         To="1"
+                                                         Duration="0:0:0.4" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation d:IsOptimized="True"
+                                                         Storyboard.TargetProperty="(UIElement.Opacity)"
+                                                         From="1"
+                                                         To="0"
+                                                         Duration="0:0:0.4" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Border.Background>
+                <ImageBrush ImageSource="pack://application:,,,/Images/not_runned.jpg" />
+            </Border.Background>
         </Border>
+
+        <Border x:Name="RunningStatusBorder"
+                Grid.Row="0"
+                Opacity="0">
+            <Border.Style>
+                <Style>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ScanningResult}"
+                                     Value="{x:Static enums:ScanningResult.Running}">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation d:IsOptimized="True"
+                                                         Storyboard.TargetProperty="(UIElement.Opacity)"
+                                                         From="0"
+                                                         To="1"
+                                                         Duration="0:0:0.4" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation d:IsOptimized="True"
+                                                         Storyboard.TargetProperty="(UIElement.Opacity)"
+                                                         From="1"
+                                                         To="0"
+                                                         Duration="0:0:0.4" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Border.Background>
+                <ImageBrush ImageSource="pack://application:,,,/Images/running.jpg" />
+            </Border.Background>
+        </Border>
+
+        <Border x:Name="WarningsStatusBorder"
+                Grid.Row="0"
+                Opacity="0">
+            <Border.Style>
+                <Style>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ScanningResult}"
+                                     Value="{x:Static enums:ScanningResult.HasWarnings}">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation d:IsOptimized="True"
+                                                         Storyboard.TargetProperty="(UIElement.Opacity)"
+                                                         From="0"
+                                                         To="1"
+                                                         Duration="0:0:0.4" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation d:IsOptimized="True"
+                                                         Storyboard.TargetProperty="(UIElement.Opacity)"
+                                                         From="1"
+                                                         To="0"
+                                                         Duration="0:0:0.4" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Border.Background>
+                <ImageBrush ImageSource="pack://application:,,,/Images/warnings.jpg" />
+            </Border.Background>
+        </Border>
+
+        <Border x:Name="NoWarningsStatusBorder"
+                Grid.Row="0"
+                Opacity="0">
+            <Border.Style>
+                <Style>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ScanningResult}"
+                                     Value="{x:Static enums:ScanningResult.HasNoWarnings}">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation d:IsOptimized="True"
+                                                         Storyboard.TargetProperty="(UIElement.Opacity)"
+                                                         From="0"
+                                                         To="1"
+                                                         Duration="0:0:0.4" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation d:IsOptimized="True"
+                                                         Storyboard.TargetProperty="(UIElement.Opacity)"
+                                                         From="1"
+                                                         To="0"
+                                                         Duration="0:0:0.4" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <Border.Background>
+                <ImageBrush ImageSource="pack://application:,,,/Images/no_warnings.jpg" />
+            </Border.Background>
+        </Border>
+
+        <StackPanel Grid.Row="0"
+                    Margin="15,0"
+                    VerticalAlignment="Center">
+            <TextBlock Margin="2"
+                       HorizontalAlignment="Center"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       Foreground="White"
+                       Text="{Binding BoldMessage, Mode=OneWay}"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap">
+                <TextBlock.Effect>
+                    <DropShadowEffect BlurRadius="3"
+                                      ShadowDepth="0"
+                                      Color="Black" />
+                </TextBlock.Effect>
+            </TextBlock>
+            <TextBlock Margin="2"
+                       HorizontalAlignment="Center"
+                       FontSize="14"
+                       Foreground="White"
+                       Text="{Binding ThinMessage, Mode=OneWay}"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap">
+                <TextBlock.Effect>
+                    <DropShadowEffect BlurRadius="3"
+                                      ShadowDepth="0"
+                                      Color="Black" />
+                </TextBlock.Effect>
+            </TextBlock>
+            <Button Margin="2"
+                    HorizontalAlignment="Center"
+                    Style="{StaticResource ReportsButtonStyle}"
+                    Visibility="{Binding IsReportsButtonVisible, Mode=OneWay, Converter={converters:BoolToVisibilityConverter}}">
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <TextBlock FontSize="14"
+                                   FontWeight="Bold"
+                                   Text="Отчеты" />
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+        </StackPanel>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
