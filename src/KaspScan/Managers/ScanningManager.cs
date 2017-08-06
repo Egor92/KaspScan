@@ -45,7 +45,7 @@ namespace KaspScan.Managers
             {
                 _scanningAlgorithm,
                 _scanningAlgorithm.Finished.Subscribe(OnScanningFinished),
-                Observable.Interval(TimeSpan.FromSeconds(20))
+                Observable.Interval(TimeSpan.FromSeconds(1))
                           .Subscribe(OnNextTime),
             });
         }

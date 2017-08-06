@@ -115,6 +115,11 @@
     <Compile Include="Constants\NavigationViewNames.cs" />
     <Compile Include="Constants\ReactiveConstants.cs" />
     <Compile Include="Constants\RegionNames.cs" />
+    <Compile Include="Converters\BoolConverterBase.cs" />
+    <Compile Include="Converters\BoolToVisibilityConverter.cs" />
+    <Compile Include="Converters\Cases\EqualsCase.cs" />
+    <Compile Include="Converters\Cases\ICase.cs" />
+    <Compile Include="Converters\ChainConverter.cs" />
     <Compile Include="Helpers\RandomHelper.cs" />
     <Compile Include="Helpers\RandomStringHelper.cs" />
     <Compile Include="Helpers\WordCase.cs" />

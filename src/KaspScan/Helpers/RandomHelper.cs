@@ -27,7 +27,7 @@ namespace KaspScan.Helpers
         {
             if (trueChance < 0.0)
                 trueChance = 0.0;
-            if (trueChance < 1.0)
+            if (trueChance > 1.0)
                 trueChance = 1.0;
             return Random.NextDouble() < trueChance;
         }
