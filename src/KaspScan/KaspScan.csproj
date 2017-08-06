@@ -36,6 +36,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Egor92.CollectionExtensions, Version=1.0.0.10, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\Egor92.CollectionExtensions.1.0.0.10\lib\portable40-net40+sl5+win8+wp8+wpa81\Egor92.CollectionExtensions.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>packages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
     </Reference>
@@ -122,14 +125,14 @@
     <Compile Include="ViewModels\Base\ActiveAwareViewModel.cs" />
     <Compile Include="ViewModels\BottomMenuViewModel.cs" />
     <Compile Include="ViewModels\Base\DisposableViewModel.cs" />
-    <Compile Include="ViewModels\UserChoiceViewModel.cs" />
+    <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ScanningViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
     <Compile Include="Views\BottomMenuView.xaml.cs">
       <DependentUpon>BottomMenuView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\UserChoiceView.xaml.cs">
-      <DependentUpon>UserChoiceView.xaml</DependentUpon>
+    <Compile Include="Views\MainView.xaml.cs">
+      <DependentUpon>MainView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ScanningView.xaml.cs">
       <DependentUpon>ScanningView.xaml</DependentUpon>
@@ -179,7 +182,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\UserChoiceView.xaml">
+    <Page Include="Views\MainView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

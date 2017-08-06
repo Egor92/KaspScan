@@ -13,11 +13,20 @@ namespace KaspScan.Model
         private readonly object _syncRoot = new object();
         private IDisposable _intervalSubscription;
         private readonly TimeSpan _algorithmStepInterval = TimeSpan.FromMilliseconds(100);
-        private const long MaxAlgorithmStep = 100;
-        private AlgorithmStatus _status = AlgorithmStatus.NotStarted;
+        private const long MaxAlgorithmStep = 50;
         private long _currentAlgorithmStep;
         private bool _generateWarnings;
         private int _warningCount;
+
+        #endregion
+
+        #region Properties
+
+        #region Status
+
+        public AlgorithmStatus Status { get; private set; } = AlgorithmStatus.NotStarted;
+
+        #endregion
 
         #endregion
 
@@ -62,6 +71,7 @@ namespace KaspScan.Model
 
         public void Dispose()
         {
+            Stop();
             _intervalSubscription?.Dispose();
             _stepPassed?.Dispose();
             _statusChanged?.Dispose();
@@ -76,16 +86,16 @@ namespace KaspScan.Model
         {
             lock (_syncRoot)
             {
-                if (_status == AlgorithmStatus.Started)
+                if (Status == AlgorithmStatus.Started)
                     return;
 
-                _status = AlgorithmStatus.Started;
+                Status = AlgorithmStatus.Started;
                 _currentAlgorithmStep = 0;
                 _warningCount = 0;
                 _generateWarnings = RandomHelper.GetBool();
                 _intervalSubscription = Observable.Interval(_algorithmStepInterval)
                                                   .Subscribe(OnNextAlgorithmStep);
-                _statusChanged.OnNext(_status);
+                _statusChanged.OnNext(Status);
             }
         }
 
@@ -93,12 +103,12 @@ namespace KaspScan.Model
         {
             lock (_syncRoot)
             {
-                if (_status != AlgorithmStatus.Started)
+                if (Status != AlgorithmStatus.Started)
                     return;
 
-                _status = AlgorithmStatus.Paused;
+                Status = AlgorithmStatus.Paused;
                 _intervalSubscription.Dispose();
-                _statusChanged.OnNext(_status);
+                _statusChanged.OnNext(Status);
             }
         }
 
@@ -106,12 +116,12 @@ namespace KaspScan.Model
         {
             lock (_syncRoot)
             {
-                if (_status == AlgorithmStatus.Started || _status == AlgorithmStatus.Paused)
+                if (Status == AlgorithmStatus.Started || Status == AlgorithmStatus.Paused)
                     return;
 
-                _status = AlgorithmStatus.Stopped;
+                Status = AlgorithmStatus.Stopped;
                 _intervalSubscription.Dispose();
-                _statusChanged.OnNext(_status);
+                _statusChanged.OnNext(Status);
             }
         }
 
@@ -122,14 +132,14 @@ namespace KaspScan.Model
             _currentAlgorithmStep++;
             if (_currentAlgorithmStep > MaxAlgorithmStep)
             {
-                _statusChanged.OnNext(AlgorithmStatus.Finished);
-                _stepPassed.OnCompleted();
+                _intervalSubscription.Dispose();
+                Status = AlgorithmStatus.Finished;
+                _statusChanged.OnNext(Status);
                 _finished.OnNext(Unit.Default);
-                _finished.OnCompleted();
                 return;
             }
 
-            var progress = _currentAlgorithmStep / MaxAlgorithmStep;
+            var progress = (double) _currentAlgorithmStep / MaxAlgorithmStep * 100;
             var actualScanningFileName = RandomStringHelper.GetWord(5, 15);
             if (_generateWarnings && RandomHelper.GetBool(0.1))
             {

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using Egor92.CollectionExtensions;
 using KaspScan.Model;
 using KaspScan.ViewModels.Base;
 
@@ -9,13 +11,15 @@ namespace KaspScan.Managers
 {
     public interface IScanningManager
     {
+        AlgorithmStatus Status { get; }
+
         IObservable<ScanningAlgorithmStepInfo> StepPassed { get; }
 
         IObservable<AlgorithmStatus> StatusChanged { get; }
 
         IObservable<Unit> Finished { get; }
 
-        IObservable<TimeSpan?> LastScanningTimeHasPassedChanged { get; }
+        IObservable<TimeSpan?> LastScanningTimeChanged { get; }
 
         void Start();
 
@@ -29,8 +33,6 @@ namespace KaspScan.Managers
         #region Fields
 
         private readonly ScanningAlgorithm _scanningAlgorithm = new ScanningAlgorithm();
-        private IDisposable _intervalSubscription;
-        private IDisposable _scanningFinished;
         private DateTime? _lastScanningFinishTime;
 
         #endregion
@@ -39,10 +41,27 @@ namespace KaspScan.Managers
 
         public ScanningManager()
         {
-            _intervalSubscription = Observable.Interval(TimeSpan.FromSeconds(20))
-                                              .Subscribe(OnNextTime);
-            _scanningFinished = _scanningAlgorithm.Finished.Subscribe(OnScanningFinished);
+            Disposables.AddRange(new[]
+            {
+                _scanningAlgorithm,
+                _scanningAlgorithm.Finished.Subscribe(OnScanningFinished),
+                Observable.Interval(TimeSpan.FromSeconds(20))
+                          .Subscribe(OnNextTime),
+            });
         }
+
+        #endregion
+
+        #region Properties
+
+        #region Status
+
+        public AlgorithmStatus Status
+        {
+            get { return _scanningAlgorithm.Status; }
+        }
+
+        #endregion
 
         #endregion
 
@@ -75,13 +94,13 @@ namespace KaspScan.Managers
 
         #endregion
 
-        #region LastScanningTimeHasPassedChanged
+        #region LastScanningTimeChanged
 
-        private readonly Subject<TimeSpan?> _lastScanningTimeHasPassedChanged = new Subject<TimeSpan?>();
+        private readonly Subject<TimeSpan?> _lastScanningTimeChanged = new Subject<TimeSpan?>();
 
-        public IObservable<TimeSpan?> LastScanningTimeHasPassedChanged
+        public IObservable<TimeSpan?> LastScanningTimeChanged
         {
-            get { return _lastScanningTimeHasPassedChanged.AsObservable(); }
+            get { return _lastScanningTimeChanged.AsObservable(); }
         }
 
         #endregion
@@ -126,8 +145,7 @@ namespace KaspScan.Managers
                 return;
 
             var lastScanningTimeHasPassed = DateTime.Now - _lastScanningFinishTime;
-            _lastScanningTimeHasPassedChanged.OnNext(lastScanningTimeHasPassed);
-
+            _lastScanningTimeChanged.OnNext(lastScanningTimeHasPassed);
         }
 
         private void OnScanningFinished(Unit unit)

@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using KaspScan.Constants;
 using KaspScan.Dependencies;
+using KaspScan.Managers;
 using KaspScan.Views;
 using Microsoft.Practices.Unity;
 using Prism.Regions;
@@ -14,17 +15,16 @@ namespace KaspScan
         {
             base.Run(runWithDefaultConfiguration);
 
-            var regionManager = Container.Resolve<IRegionManager>();
-            regionManager.RequestNavigate(RegionNames.MainWorkspaceRegion, NavigationViewNames.UserChoice);
-            regionManager.RegisterViewWithRegion(RegionNames.BottomMenuRegion, typeof(BottomMenuView));
+            RegisterViews();
         }
 
         protected override void ConfigureContainer()
         {
             base.ConfigureContainer();
             Container.RegisterInstance<ISchedulers>(new Schedulers(Application.Current.Dispatcher));
+            Container.RegisterType<IScanningManager, ScanningManager>(new ContainerControlledLifetimeManager());
 
-            Container.RegisterTypeForNavigation<UserChoiceView>(NavigationViewNames.UserChoice);
+            Container.RegisterTypeForNavigation<MainView>(NavigationViewNames.Main);
             Container.RegisterTypeForNavigation<ScanningView>(NavigationViewNames.Scanning);
         }
 
@@ -37,6 +37,13 @@ namespace KaspScan
         {
             Application.Current.MainWindow = (Window)Shell;
             Application.Current.MainWindow.Show();
+        }
+
+        private void RegisterViews()
+        {
+            var regionManager = Container.Resolve<IRegionManager>();
+            regionManager.RequestNavigate(RegionNames.MainWorkspaceRegion, NavigationViewNames.Main);
+            regionManager.RegisterViewWithRegion(RegionNames.BottomMenuRegion, typeof(BottomMenuView));
         }
     }
 }

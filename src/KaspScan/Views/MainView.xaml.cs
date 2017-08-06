@@ -3,9 +3,9 @@ using KaspScan.ViewModels;
 
 namespace KaspScan.Views
 {
-    public partial class UserChoiceView : UserControl
+    public partial class MainView : UserControl
     {
-        public UserChoiceView(UserChoiceViewModel viewModel)
+        public MainView(MainViewModel viewModel)
         {
             InitializeComponent();
             DataContext = viewModel;
