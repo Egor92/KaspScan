@@ -79,7 +79,7 @@
                                         <DoubleAnimation d:IsOptimized="True"
                                                          Storyboard.TargetName="DarknessBorder"
                                                          Storyboard.TargetProperty="(UIElement.Opacity)"
-                                                         To="1"
+                                                         To="0"
                                                          Duration="0:0:0.3" />
                                     </Storyboard>
                                 </VisualState>
