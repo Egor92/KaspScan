@@ -305,7 +305,7 @@
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0"
                     Content="{Binding}"
-                    Style="{DynamicResource ScanButtonStyle}"
+                    Style="{StaticResource ScanButtonStyle}"
                     Tag="Выборочная проверка">
                 <Button.ContentTemplate>
                     <DataTemplate>
@@ -356,12 +356,58 @@
                     Command="{Binding StartScanningCommand, Mode=OneWay}"
                     Content="{Binding}"
                     ContentTemplate="{Binding IsScanningProgressVisible, Mode=OneWay, Converter={StaticResource IsScanningProgressVisibleConverter}}"
-                    Style="{DynamicResource ScanButtonStyle}"
-                    Tag="Проверка компьютера" />
+                    Tag="Проверка компьютера">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource ScanButtonStyle}"
+                           TargetType="{x:Type Button}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ScanningResult}"
+                                         Value="{x:Static enums:ScanningResult.NotRunned}">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ThicknessAnimation d:IsOptimized="True"
+                                                                Storyboard.TargetProperty="(Control.Margin)"
+                                                                To="-15,-75,-15,70"
+                                                                Duration="0" />
+                                            <DoubleAnimation d:IsOptimized="True"
+                                                             Storyboard.TargetProperty="(Control.Width)"
+                                                             To="240"
+                                                             Duration="0" />
+                                            <DoubleAnimation d:IsOptimized="True"
+                                                             Storyboard.TargetProperty="(Control.Height)"
+                                                             To="210"
+                                                             Duration="0" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <ThicknessAnimation d:IsOptimized="True"
+                                                                Storyboard.TargetProperty="(Control.Margin)"
+                                                                To="15"
+                                                                Duration="0:0:1" />
+                                            <DoubleAnimation d:IsOptimized="True"
+                                                             Storyboard.TargetProperty="(Control.Width)"
+                                                             To="180"
+                                                             Duration="0:0:1" />
+                                            <DoubleAnimation d:IsOptimized="True"
+                                                             Storyboard.TargetProperty="(Control.Height)"
+                                                             To="160"
+                                                             Duration="0:0:1" />
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.ExitActions>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
             <Button Grid.Column="2"
                     Padding="-15"
                     Content="{Binding}"
-                    Style="{DynamicResource ScanButtonStyle}"
+                    Style="{StaticResource ScanButtonStyle}"
                     Tag="Проверка стороннего ПО">
                 <Button.ContentTemplate>
                     <DataTemplate>
