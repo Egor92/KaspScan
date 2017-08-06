@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KaspScan", "KaspScan.csproj", "{3C75E06F-9549-40B2-8D82-4FBCB20CC06E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KaspScan\KaspScan", "KaspScan\KaspScan.csproj", "{3C75E06F-9549-40B2-8D82-4FBCB20CC06E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

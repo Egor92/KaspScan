@@ -7,9 +7,10 @@
         xmlns:regions="http://prismlibrary.com/"
         xmlns:viewModels="clr-namespace:KaspScan.ViewModels"
         Title="Kaspersky Security Scan"
-        Width="500"
+        Width="700"
         Height="500"
         d:DataContext="{d:DesignInstance viewModels:ShellViewModel}"
+        ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d">
     <Grid>

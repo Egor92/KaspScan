@@ -33,7 +33,7 @@ namespace KaspScan.ViewModels
 
         private void Initialize()
         {
-            Disposables.AddRange(new []
+            Disposables.AddRange(new[]
             {
                 InitializeLastScanningTimeProperty(),
                 InitializeProgressProperty(),
@@ -114,8 +114,13 @@ namespace KaspScan.ViewModels
                 case AlgorithmStatus.Running:
                 case AlgorithmStatus.Paused:
                 case AlgorithmStatus.Stopped:
-                case AlgorithmStatus.Finished:
                     return $"В результате проверки найдено {stepInfo.WarningCount} проблем";
+                case AlgorithmStatus.Finished:
+                    if (stepInfo.WarningCount == 0)
+                        return "Проблем не убнаружено. Рекомендуется установить защиту";
+
+                    return $"В результате проверки найдено {stepInfo.WarningCount} проблем";
+
                 default:
                     throw new Exception($"Unhandled case with {_scanningManager.Status}");
             }

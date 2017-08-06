@@ -6,7 +6,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:enums="clr-namespace:KaspScan.Enums"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:model="clr-namespace:KaspScan.Model"
              xmlns:viewModels="clr-namespace:KaspScan.ViewModels"
              d:DataContext="{d:DesignInstance viewModels:MainViewModel}"
              d:DesignHeight="300"
@@ -14,6 +13,9 @@
              mc:Ignorable="d">
     <UserControl.Resources>
         <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Themes/Button.ReportButtonStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
             <converters:SwitchConverter x:Key="AlgorithmStatusToImageConverter">
                 <cases:EqualsCase Key="{x:Static enums:ScanningResult.NotRunned}">
                     <cases:EqualsCase.Value>
@@ -61,8 +63,16 @@
                            TextAlignment="Center"
                            TextWrapping="Wrap" />
                 <Button HorizontalAlignment="Center"
-                        Content="Отчеты"
-                        Visibility="{Binding IsReportsButtonVisible, Mode=OneWay, Converter={converters:BoolToVisibilityConverter}}" />
+                        Style="{StaticResource ReportsButtonStyle}"
+                        Visibility="{Binding IsReportsButtonVisible, Mode=OneWay, Converter={converters:BoolToVisibilityConverter}}">
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <TextBlock FontSize="14"
+                                       FontWeight="Bold"
+                                       Text="Отчеты" />
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
             </StackPanel>
         </Border>
 
