@@ -5,26 +5,41 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:KaspScan.ViewModels"
              d:DataContext="{d:DesignInstance viewModels:BottomMenuViewModel}"
-             d:DesignHeight="300"
+             d:DesignHeight="40"
              d:DesignWidth="300"
              mc:Ignorable="d">
-    <Grid>
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Themes/Button.BottomMenuButtonStyle.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <Grid Background="#505050">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Column="0"
                     HorizontalAlignment="Left"
+                    Margin="5"
                     Orientation="Horizontal">
-            <Button Content="Mail" />
-            <Button Content="My Kaspersky" />
-            <Button Content="Настройка" />
-            <Button Content="Оставить отзыв" />
+            <Button Content="Mail"
+                    Style="{StaticResource BottomMenuButtonStyle}" />
+            <Button Content="My Kaspersky"
+                    Style="{StaticResource BottomMenuButtonStyle}" />
+            <Button Content="Настройка"
+                    Style="{StaticResource BottomMenuButtonStyle}" />
+            <Button Content="Оставить отзыв"
+                    Style="{StaticResource BottomMenuButtonStyle}" />
         </StackPanel>
         <StackPanel Grid.Column="1"
+                    Margin="5"
                     HorizontalAlignment="Right"
                     Orientation="Horizontal">
-            <Button Content="Обновление баз" />
+            <Button Content="Обновление баз"
+                    Style="{StaticResource BottomMenuButtonStyle}" />
         </StackPanel>
     </Grid>
 </UserControl>
