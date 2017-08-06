@@ -1,14 +1,43 @@
 ﻿<UserControl x:Class="KaspScan.Views.MainView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cases="clr-namespace:KaspScan.Converters.Cases"
              xmlns:converters="clr-namespace:KaspScan.Converters"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:enums="clr-namespace:KaspScan.Enums"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:model="clr-namespace:KaspScan.Model"
              xmlns:viewModels="clr-namespace:KaspScan.ViewModels"
              d:DataContext="{d:DesignInstance viewModels:MainViewModel}"
              d:DesignHeight="300"
              d:DesignWidth="300"
              mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <converters:SwitchConverter x:Key="AlgorithmStatusToImageConverter">
+                <cases:EqualsCase Key="{x:Static enums:ScanningResult.NotRunned}">
+                    <cases:EqualsCase.Value>
+                        <ImageBrush ImageSource="pack://application:,,,/Images/not_runned.jpg" />
+                    </cases:EqualsCase.Value>
+                </cases:EqualsCase>
+                <cases:EqualsCase Key="{x:Static enums:ScanningResult.Running}">
+                    <cases:EqualsCase.Value>
+                        <ImageBrush ImageSource="pack://application:,,,/Images/running.jpg" />
+                    </cases:EqualsCase.Value>
+                </cases:EqualsCase>
+                <cases:EqualsCase Key="{x:Static enums:ScanningResult.HasWarnings}">
+                    <cases:EqualsCase.Value>
+                        <ImageBrush ImageSource="pack://application:,,,/Images/warnings.jpg" />
+                    </cases:EqualsCase.Value>
+                </cases:EqualsCase>
+                <cases:EqualsCase Key="{x:Static enums:ScanningResult.HasNoWarnings}">
+                    <cases:EqualsCase.Value>
+                        <ImageBrush ImageSource="pack://application:,,,/Images/no_warnings.jpg" />
+                    </cases:EqualsCase.Value>
+                </cases:EqualsCase>
+            </converters:SwitchConverter>
+        </ResourceDictionary>
+    </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -16,16 +45,18 @@
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <Border>
+        <Border Background="{Binding ScanningResult, Mode=OneWay, Converter={StaticResource AlgorithmStatusToImageConverter}}">
             <StackPanel Margin="15,0"
                         VerticalAlignment="Center">
                 <TextBlock HorizontalAlignment="Center"
                            FontSize="24"
                            FontWeight="Bold"
+                           Foreground="White"
                            Text="{Binding BoldMessage, Mode=OneWay}"
                            TextAlignment="Center"
                            TextWrapping="Wrap" />
                 <TextBlock HorizontalAlignment="Center"
+                           Foreground="White"
                            Text="{Binding ThinMessage, Mode=OneWay}"
                            TextAlignment="Center"
                            TextWrapping="Wrap" />

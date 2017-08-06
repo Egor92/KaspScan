@@ -15,10 +15,6 @@ namespace KaspScan.Managers
 
         IObservable<ScanningAlgorithmStepInfo> StepPassed { get; }
 
-        IObservable<AlgorithmStatus> StatusChanged { get; }
-
-        IObservable<Unit> Finished { get; }
-
         IObservable<TimeSpan?> LastScanningTimeChanged { get; }
 
         void Start();
@@ -44,7 +40,7 @@ namespace KaspScan.Managers
             Disposables.AddRange(new[]
             {
                 _scanningAlgorithm,
-                _scanningAlgorithm.Finished.Subscribe(OnScanningFinished),
+                _scanningAlgorithm.StepPassed.Subscribe(OnStepPassed),
                 Observable.Interval(TimeSpan.FromSeconds(1))
                           .Subscribe(OnNextTime),
             });
@@ -72,24 +68,6 @@ namespace KaspScan.Managers
         public IObservable<ScanningAlgorithmStepInfo> StepPassed
         {
             get { return _scanningAlgorithm.StepPassed; }
-        }
-
-        #endregion
-
-        #region StatusChanged
-
-        public IObservable<AlgorithmStatus> StatusChanged
-        {
-            get { return _scanningAlgorithm.StatusChanged; }
-        }
-
-        #endregion
-
-        #region Finished
-
-        public IObservable<Unit> Finished
-        {
-            get { return _scanningAlgorithm.Finished; }
         }
 
         #endregion
@@ -148,7 +126,7 @@ namespace KaspScan.Managers
             _lastScanningTimeChanged.OnNext(lastScanningTimeHasPassed);
         }
 
-        private void OnScanningFinished(Unit unit)
+        private void OnStepPassed(ScanningAlgorithmStepInfo stepInfo)
         {
             _lastScanningFinishTime = DateTime.Now;
         }

@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using Egor92.CollectionExtensions;
 using KaspScan.Dependencies;
+using KaspScan.Enums;
 using KaspScan.Managers;
 using KaspScan.Model;
 using KaspScan.ViewModels.Base;
@@ -19,7 +18,6 @@ namespace KaspScan.ViewModels
         #region Fields
 
         private readonly IScanningManager _scanningManager;
-        private readonly IObservable<bool> _isActiveChanged;
 
         #endregion
 
@@ -30,21 +28,19 @@ namespace KaspScan.ViewModels
         {
             _scanningManager = scanningManager;
 
-            _isActiveChanged = this.ObservableForProperty(x => x.IsActive)
-                                   .Select(x => x.Value);
             Initialize();
         }
 
         private void Initialize()
         {
-            Disposables.AddRange(new[]
+            Disposables.AddRange(new []
             {
                 InitializeLastScanningTimeProperty(),
-                InitializeAlgorithmStatusProperty(),
                 InitializeProgressProperty(),
                 InitializeIsReportsButtonVisibleProperty(),
                 InitializeBoldMessageProperty(),
                 InitializeThinMessageProperty(),
+                InitializeScanningResultProperty(),
             });
         }
 
@@ -63,32 +59,8 @@ namespace KaspScan.ViewModels
 
         private IDisposable InitializeLastScanningTimeProperty()
         {
-            Expression<Func<MainViewModel, IObservable<TimeSpan?>>> lastScanningTimeChanged =
-                x => x._scanningManager.LastScanningTimeChanged;
-            return _lastScanningTime = this.WhenAnyObservable(lastScanningTimeChanged, x => x._isActiveChanged, (x1, x2) => x1)
-                                           .Where(_ => IsActive)
-                                           .ToProperty(this, x => x.LastScanningTime, null);
-        }
-
-        #endregion
-
-        #region AlgorithmStatus
-
-        private ObservableAsPropertyHelper<AlgorithmStatus> _algorithmStatus;
-
-        public AlgorithmStatus AlgorithmStatus
-        {
-            get { return _algorithmStatus.Value; }
-        }
-
-        private IDisposable InitializeAlgorithmStatusProperty()
-        {
-            const AlgorithmStatus initialAlgorithmStatus = AlgorithmStatus.NotStarted;
-            Expression<Func<MainViewModel, IObservable<AlgorithmStatus>>> algorithmStatusChanged =
-                x => x._scanningManager.StatusChanged;
-            return _algorithmStatus = this.WhenAnyObservable(algorithmStatusChanged, x => x._isActiveChanged, (x1, x2) => x1)
-                                          .Where(_ => IsActive)
-                                          .ToProperty(this, x => x.AlgorithmStatus, initialAlgorithmStatus);
+            return _lastScanningTime = _scanningManager.LastScanningTimeChanged.Where(_ => IsActive)
+                                                       .ToProperty(this, x => x.LastScanningTime, null);
         }
 
         #endregion
@@ -104,11 +76,9 @@ namespace KaspScan.ViewModels
 
         private IDisposable InitializeProgressProperty()
         {
-            Expression<Func<MainViewModel, IObservable<ScanningAlgorithmStepInfo>>> stepPassed = x => x._scanningManager.StepPassed;
-            return _progress = this.WhenAnyObservable(stepPassed, x => x._isActiveChanged, (x1, x2) => x1)
-                                   .Where(_ => IsActive)
-                                   .Select(y => y.Progress)
-                                   .ToProperty(this, x => x.Progress);
+            return _progress = _scanningManager.StepPassed.Where(_ => IsActive)
+                                               .Select(y => y.Progress)
+                                               .ToProperty(this, x => x.Progress);
         }
 
         #endregion
@@ -124,19 +94,14 @@ namespace KaspScan.ViewModels
 
         private IDisposable InitializeBoldMessageProperty()
         {
-            Expression<Func<MainViewModel, IObservable<AlgorithmStatus>>> algorithmStatusChanged =
-                x => x._scanningManager.StatusChanged;
-            Expression<Func<MainViewModel, IObservable<ScanningAlgorithmStepInfo>>> stepPassed = x => x._scanningManager.StepPassed;
-            return _boldMessage = this
-                .WhenAnyObservable(algorithmStatusChanged, stepPassed, x => x._isActiveChanged, (x1, x2, x3) => x2)
-                .Where(_ => IsActive)
-                .Select(GetBoldMessage)
-                .ToProperty(this, x => x.BoldMessage, GetBoldMessage());
+            return _boldMessage = _scanningManager.StepPassed.Where(_ => IsActive)
+                                                  .Select(GetBoldMessage)
+                                                  .ToProperty(this, x => x.BoldMessage, GetBoldMessage());
         }
 
         private string GetBoldMessage()
         {
-            var stepInfo = new ScanningAlgorithmStepInfo(0.0, null, 0);
+            var stepInfo = new ScanningAlgorithmStepInfo(_scanningManager.Status, 0.0, null, 0);
             return GetBoldMessage(stepInfo);
         }
 
@@ -144,9 +109,9 @@ namespace KaspScan.ViewModels
         {
             switch (_scanningManager.Status)
             {
-                case AlgorithmStatus.NotStarted:
+                case AlgorithmStatus.NotRunned:
                     return "Рекомендуется запустить проверку";
-                case AlgorithmStatus.Started:
+                case AlgorithmStatus.Running:
                 case AlgorithmStatus.Paused:
                 case AlgorithmStatus.Stopped:
                 case AlgorithmStatus.Finished:
@@ -169,31 +134,31 @@ namespace KaspScan.ViewModels
 
         private IDisposable InitializeThinMessageProperty()
         {
-            Expression<Func<MainViewModel, IObservable<AlgorithmStatus>>> algorithmStatusChanged =
-                x => x._scanningManager.StatusChanged;
+            Expression<Func<MainViewModel, IObservable<ScanningAlgorithmStepInfo>>> stepPassedChanged =
+                x => x._scanningManager.StepPassed;
             Expression<Func<MainViewModel, IObservable<TimeSpan?>>> lastScanningTimeChanged =
                 x => x._scanningManager.LastScanningTimeChanged;
-            return _thinMessage = this.WhenAnyObservable(algorithmStatusChanged, lastScanningTimeChanged, x => x._isActiveChanged,
-                                                         (x1, x2, x3) => new Tuple<AlgorithmStatus, TimeSpan?>(x1, x2))
+            return _thinMessage = this.WhenAnyObservable(stepPassedChanged, lastScanningTimeChanged,
+                                                         (x1, x2) => new Tuple<ScanningAlgorithmStepInfo, TimeSpan?>(x1, x2))
                                       .Where(_ => IsActive)
                                       .Select(GetThinMessage)
                                       .ToProperty(this, x => x.ThinMessage, GetThinMessage());
         }
 
-        private static string GetThinMessage()
+        private string GetThinMessage()
         {
-            var algorithmStatus = AlgorithmStatus.NotStarted;
+            var algorithmStatus = new ScanningAlgorithmStepInfo(_scanningManager.Status, Progress, null, 0);
             TimeSpan? lastScanningTime = null;
-            var tuple = new Tuple<AlgorithmStatus, TimeSpan?>(algorithmStatus, lastScanningTime);
+            var tuple = new Tuple<ScanningAlgorithmStepInfo, TimeSpan?>(algorithmStatus, lastScanningTime);
             return GetThinMessage(tuple);
         }
 
-        private static string GetThinMessage(Tuple<AlgorithmStatus, TimeSpan?> tuple)
+        private static string GetThinMessage(Tuple<ScanningAlgorithmStepInfo, TimeSpan?> tuple)
         {
-            var algorithmStatus = tuple.Item1;
+            var stepInfo = tuple.Item1;
             var timeSpan = tuple.Item2;
 
-            if (algorithmStatus == AlgorithmStatus.NotStarted || timeSpan == null)
+            if (stepInfo.Status == AlgorithmStatus.NotRunned || timeSpan == null)
                 return "Проверка ещё не запускалась";
 
             var lastScanningTime = timeSpan.Value;
@@ -216,14 +181,51 @@ namespace KaspScan.ViewModels
 
         private IDisposable InitializeIsReportsButtonVisibleProperty()
         {
-            return _isReportsButtonVisible = this.WhenAnyValue(x => x.AlgorithmStatus)
-                                                 .Select(_ => GetIsReportsButtonVisible())
-                                                 .ToProperty(this, x => x.IsReportsButtonVisible, GetIsReportsButtonVisible());
+            return _isReportsButtonVisible = _scanningManager.StepPassed.Select(_ => GetIsReportsButtonVisible())
+                                                             .ToProperty(this, x => x.IsReportsButtonVisible,
+                                                                         GetIsReportsButtonVisible());
         }
 
         private bool GetIsReportsButtonVisible()
         {
-            return AlgorithmStatus != AlgorithmStatus.NotStarted;
+            return _scanningManager.Status != AlgorithmStatus.NotRunned;
+        }
+
+        #endregion
+
+        #region ScanningResult
+
+        private ObservableAsPropertyHelper<ScanningResult> _scanningResult;
+
+        public ScanningResult ScanningResult
+        {
+            get { return _scanningResult.Value; }
+        }
+
+        private IDisposable InitializeScanningResultProperty()
+        {
+            return _scanningResult = _scanningManager.StepPassed.Select(GetScanningResult)
+                                                     .ToProperty(this, x => x.ScanningResult, GetScanningResult());
+        }
+
+        private ScanningResult GetScanningResult()
+        {
+            var stepInfo = new ScanningAlgorithmStepInfo(_scanningManager.Status, Progress, null, 0);
+            return GetScanningResult(stepInfo);
+        }
+
+        private ScanningResult GetScanningResult(ScanningAlgorithmStepInfo stepInfo)
+        {
+            if (stepInfo.Status == AlgorithmStatus.NotRunned)
+                return ScanningResult.NotRunned;
+
+            if (stepInfo.Status != AlgorithmStatus.Finished)
+                return ScanningResult.Running;
+
+            if (stepInfo.WarningCount == 0)
+                return ScanningResult.HasNoWarnings;
+
+            return ScanningResult.HasWarnings;
         }
 
         #endregion
@@ -247,7 +249,7 @@ namespace KaspScan.ViewModels
 
         private void StartScanning()
         {
-            if (_scanningManager.Status != AlgorithmStatus.Started)
+            if (_scanningManager.Status != AlgorithmStatus.Running)
             {
                 _scanningManager.Start();
             }
@@ -258,18 +260,5 @@ namespace KaspScan.ViewModels
         #endregion
 
         #endregion
-
-        #region Overriden members
-
-        protected override IEnumerable<IDisposable> GetSubscriptionsOnActivation()
-        {
-            yield return _scanningManager.Finished.Subscribe(OnScanningFinished);
-        }
-
-        #endregion
-
-        private void OnScanningFinished(Unit unit)
-        {
-        }
     }
 }

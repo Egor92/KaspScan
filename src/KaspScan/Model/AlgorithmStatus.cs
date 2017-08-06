@@ -2,8 +2,8 @@
 {
     public enum AlgorithmStatus
     {
-        NotStarted,
-        Started,
+        NotRunned,
+        Running,
         Paused,
         Stopped,
         Finished,

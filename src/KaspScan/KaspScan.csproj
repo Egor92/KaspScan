@@ -120,6 +120,7 @@
     <Compile Include="Converters\Cases\EqualsCase.cs" />
     <Compile Include="Converters\Cases\ICase.cs" />
     <Compile Include="Converters\ChainConverter.cs" />
+    <Compile Include="Converters\SwitchConverter.cs" />
     <Compile Include="Helpers\RandomHelper.cs" />
     <Compile Include="Helpers\RandomStringHelper.cs" />
     <Compile Include="Helpers\WordCase.cs" />
@@ -127,6 +128,7 @@
     <Compile Include="Model\AlgorithmStatus.cs" />
     <Compile Include="Model\ScanningAlgorithm.cs" />
     <Compile Include="Model\ScanningAlgorithmStepInfo.cs" />
+    <Compile Include="Enums\ScanningResult.cs" />
     <Compile Include="ViewModels\Base\ActiveAwareViewModel.cs" />
     <Compile Include="ViewModels\BottomMenuViewModel.cs" />
     <Compile Include="ViewModels\Base\DisposableViewModel.cs" />
@@ -200,7 +202,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\not_runned.jpg" />
+    <Resource Include="Images\no_warnings.jpg" />
+    <Resource Include="Images\warnings.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\running.jpg" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="packages\Fody.2.0.7\build\dotnet\Fody.targets" Condition="Exists('packages\Fody.2.0.7\build\dotnet\Fody.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
