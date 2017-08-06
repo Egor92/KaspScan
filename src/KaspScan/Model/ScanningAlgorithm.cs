@@ -11,8 +11,8 @@ namespace KaspScan.Model
 
         private readonly object _syncRoot = new object();
         private IDisposable _intervalSubscription;
-        private readonly TimeSpan _algorithmStepInterval = TimeSpan.FromMilliseconds(100);
-        private const long MaxAlgorithmStep = 50;
+        private readonly TimeSpan _algorithmStepInterval = TimeSpan.FromMilliseconds(10);
+        private const long MaxAlgorithmStep = 500;
         private long _currentAlgorithmStep;
         private bool _generateWarnings;
         private int _warningCount;
@@ -104,7 +104,7 @@ namespace KaspScan.Model
             _currentAlgorithmStep++;
             var progress = (double) _currentAlgorithmStep / MaxAlgorithmStep * 100;
             var actualScanningFileName = RandomStringHelper.GetWord(5, 15);
-            if (_generateWarnings && RandomHelper.GetBool(0.1))
+            if (_generateWarnings && RandomHelper.GetBool(0.01))
             {
                 _warningCount++;
             }

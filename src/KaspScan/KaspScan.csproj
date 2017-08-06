@@ -112,6 +112,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="CircularProgressBar\CircularProgress.cs" />
+    <Compile Include="CircularProgressBar\DoubleToPctConverter.cs" />
     <Compile Include="Constants\NavigationViewNames.cs" />
     <Compile Include="Constants\ReactiveConstants.cs" />
     <Compile Include="Constants\RegionNames.cs" />
@@ -121,6 +123,7 @@
     <Compile Include="Converters\Cases\ICase.cs" />
     <Compile Include="Converters\ChainConverter.cs" />
     <Compile Include="Converters\SwitchConverter.cs" />
+    <Compile Include="Helpers\Booleans.cs" />
     <Compile Include="Helpers\RandomHelper.cs" />
     <Compile Include="Helpers\RandomStringHelper.cs" />
     <Compile Include="Helpers\WordCase.cs" />
@@ -173,6 +176,10 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <Page Include="Themes\ProgressBar.CircularProgreeBarStyle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Themes\Button.BottomMenuButtonStyle.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

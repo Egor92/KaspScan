@@ -41,6 +41,7 @@ namespace KaspScan.ViewModels
                 InitializeBoldMessageProperty(),
                 InitializeThinMessageProperty(),
                 InitializeScanningResultProperty(),
+                InitializeIsScanningProgressVisibleProperty(),
             });
         }
 
@@ -231,6 +232,34 @@ namespace KaspScan.ViewModels
                 return ScanningResult.HasNoWarnings;
 
             return ScanningResult.HasWarnings;
+        }
+
+        #endregion
+
+        #region IsScanningProgressVisible
+
+        private ObservableAsPropertyHelper<bool> _isScanningProgressVisible;
+
+        public bool IsScanningProgressVisible
+        {
+            get { return _isScanningProgressVisible.Value; }
+        }
+
+        private IDisposable InitializeIsScanningProgressVisibleProperty()
+        {
+            return _isScanningProgressVisible = _scanningManager.StepPassed
+                            .Select(GetIsScanningProgressVisible)
+                            .ToProperty(this, x => x.IsScanningProgressVisible, GetIsScanningProgressVisible());
+        }
+
+        private bool GetIsScanningProgressVisible()
+        {
+            return _scanningManager.Status != AlgorithmStatus.NotRunned;
+        }
+
+        private bool GetIsScanningProgressVisible(ScanningAlgorithmStepInfo stepInfo)
+        {
+            return stepInfo.Status != AlgorithmStatus.NotRunned;
         }
 
         #endregion
