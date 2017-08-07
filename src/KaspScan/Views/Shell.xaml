@@ -10,6 +10,7 @@
         Width="700"
         Height="500"
         d:DataContext="{d:DesignInstance viewModels:ShellViewModel}"
+        Icon="pack://application:,,,/ico.ico"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d">
