@@ -4,7 +4,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 using KaspScan.Constants;
-using KaspScan.Dependencies;
+using KaspScan.Reacitve;
 using Prism;
 using ReactiveUI;
 
@@ -61,7 +61,7 @@ namespace KaspScan.ViewModels.Base
             }
         }
 
-        [Obsolete("Do not use this event. Use ReactiveUI subscribtion!")]
+        [Obsolete("Do not use this event. Use ReactiveUI subscription!")]
         public event EventHandler IsActiveChanged;
 
         protected virtual void RaiseIsActiveChanged()

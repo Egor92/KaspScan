@@ -1,4 +1,4 @@
-﻿using KaspScan.Dependencies;
+﻿using KaspScan.Reacitve;
 using KaspScan.ViewModels.Base;
 
 namespace KaspScan.ViewModels

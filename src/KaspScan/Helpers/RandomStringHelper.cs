@@ -64,21 +64,5 @@ namespace KaspScan.Helpers
             }
             return RandomHelper.GetChar(minChar, maxChar);
         }
-
-        public static string GetHexColor(object arg)
-        {
-            if (arg == null)
-                return null;
-            var argb = arg.GetHashCode();
-            return $"#{argb,8:X8}";
-        }
-
-        public static string GetHexColor(object arg, byte alfa)
-        {
-            if (arg == null)
-                return null;
-            var rgb = Math.Abs(arg.GetHashCode()) % (255 * 255 * 255);
-            return $"#{alfa,2:X2}{rgb,6:X6}";
-        }
     }
 }

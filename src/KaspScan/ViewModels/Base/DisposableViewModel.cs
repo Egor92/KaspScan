@@ -21,7 +21,7 @@ namespace KaspScan.ViewModels.Base
 
         #region DisposableEnumerables
 
-        private ICollection<IEnumerable> DisposableEnumerables { get; } = new Collection<IEnumerable>();
+        protected ICollection<IEnumerable> DisposableEnumerables { get; } = new Collection<IEnumerable>();
 
         #endregion
 

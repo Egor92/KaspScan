@@ -4,10 +4,11 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using Egor92.CollectionExtensions;
-using KaspScan.Dependencies;
 using KaspScan.Enums;
+using KaspScan.Helpers;
 using KaspScan.Managers;
 using KaspScan.Model;
+using KaspScan.Reacitve;
 using KaspScan.ViewModels.Base;
 using ReactiveUI;
 
@@ -115,12 +116,14 @@ namespace KaspScan.ViewModels
                 case AlgorithmStatus.Running:
                 case AlgorithmStatus.Paused:
                 case AlgorithmStatus.Stopped:
-                    return $"В результате проверки найдено {stepInfo.WarningCount} проблем";
+                    var problemWord = NumeralsHelpers.GetFeminineWordInNominativeCase("проблем", stepInfo.WarningCount);
+                    return $"В результате проверки найдено {stepInfo.WarningCount} {problemWord}";
                 case AlgorithmStatus.Finished:
                     if (stepInfo.WarningCount == 0)
                         return "Проблем не убнаружено. Рекомендуется установить защиту";
 
-                    return $"В результате проверки найдено {stepInfo.WarningCount} проблем";
+                    problemWord = NumeralsHelpers.GetFeminineWordInNominativeCase("проблем", stepInfo.WarningCount);
+                    return $"В результате проверки найдено {stepInfo.WarningCount} {problemWord}";
 
                 default:
                     throw new Exception($"Unhandled case with {_scanningManager.Status}");
@@ -174,9 +177,12 @@ namespace KaspScan.ViewModels
 
             var lastScanningTime = timeSpan.Value;
             var hours = lastScanningTime.Hours;
+            var hoursWord = NumeralsHelpers.GetMasculineWordInDativeCase("час", hours);
             var minutes = lastScanningTime.Minutes;
+            var minutesWord = NumeralsHelpers.GetFeminineWordInDativeCase("минут", minutes);
             var seconds = lastScanningTime.Seconds;
-            return $"Последняя проверка компьютера: {hours} часов {minutes} минут {seconds} секунд назад";
+            var secondsWord = NumeralsHelpers.GetFeminineWordInDativeCase("секунд", seconds);
+            return $"Последняя проверка компьютера: {hours} {hoursWord} {minutes} {minutesWord} {seconds} {secondsWord} назад";
         }
 
         #endregion

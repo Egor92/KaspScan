@@ -2,7 +2,7 @@
 using System.Reactive.Concurrency;
 using System.Windows.Threading;
 
-namespace KaspScan.Dependencies
+namespace KaspScan.Reacitve
 {
     public interface ISchedulers
     {

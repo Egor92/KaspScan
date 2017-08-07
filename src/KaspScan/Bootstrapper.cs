@@ -1,7 +1,8 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using KaspScan.Constants;
-using KaspScan.Dependencies;
 using KaspScan.Managers;
+using KaspScan.Reacitve;
 using KaspScan.Views;
 using Microsoft.Practices.Unity;
 using Prism.Regions;
@@ -15,6 +16,7 @@ namespace KaspScan
         {
             base.Run(runWithDefaultConfiguration);
 
+            AttachAppBehaviors();
             RegisterViews();
         }
 
@@ -37,6 +39,12 @@ namespace KaspScan
         {
             Application.Current.MainWindow = (Window)Shell;
             Application.Current.MainWindow.Show();
+        }
+
+        private void AttachAppBehaviors()
+        {
+            var appDomainExceptionHandleManager = new AppDomainExceptionHandleManager(AppDomain.CurrentDomain);
+            appDomainExceptionHandleManager.Attach();
         }
 
         private void RegisterViews()
