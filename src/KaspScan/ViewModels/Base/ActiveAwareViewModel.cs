@@ -31,7 +31,7 @@ namespace KaspScan.ViewModels.Base
 
         private void SubscribeToPropertyChanged()
         {
-            Disposables.Add(SubscribeToIsActiveChanged());
+            AddDisposable(SubscribeToIsActiveChanged());
         }
 
         #endregion
@@ -47,7 +47,9 @@ namespace KaspScan.ViewModels.Base
 
         #endregion
 
-        #region IsActive
+        #endregion
+
+        #region Implementation of IActiveAware
 
         private bool _isActive;
 
@@ -103,8 +105,6 @@ namespace KaspScan.ViewModels.Base
                 _waitActivatingIsFinished.Set();
             }
         }
-
-        #endregion
 
         #endregion
 

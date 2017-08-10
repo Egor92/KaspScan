@@ -37,11 +37,11 @@ namespace KaspScan.Managers
 
         public ScanningManager()
         {
-            Disposables.AddRange(new[]
+            AddDisposables(new[]
             {
                 _scanningAlgorithm,
                 _scanningAlgorithm.StepPassed.Subscribe(OnStepPassed),
-                Observable.Interval(TimeSpan.FromSeconds(1))
+                Observable.Interval(TimeSpan.FromMilliseconds(50))
                           .Subscribe(OnNextTime),
             });
         }

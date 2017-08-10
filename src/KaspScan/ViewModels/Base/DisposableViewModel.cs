@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Reactive.Disposables;
 using System.Threading;
 using ReactiveUI;
@@ -11,19 +8,13 @@ namespace KaspScan.ViewModels.Base
 {
     public abstract class DisposableViewModel : ReactiveObject, IDisposable
     {
+        #region Fields
+
+        private readonly CompositeDisposable _disposables = new CompositeDisposable();
+
+        #endregion
+
         #region Properties
-
-        #region Disposables
-
-        protected CompositeDisposable Disposables { get; } = new CompositeDisposable();
-
-        #endregion
-
-        #region DisposableEnumerables
-
-        protected ICollection<IEnumerable> DisposableEnumerables { get; } = new Collection<IEnumerable>();
-
-        #endregion
 
         #region IsDisposed
 
@@ -60,20 +51,25 @@ namespace KaspScan.ViewModels.Base
         {
             if (disposing)
             {
-                Disposables.Dispose();
-
-                foreach (var disposableEnumerable in DisposableEnumerables)
-                {
-                    foreach (var disposable in disposableEnumerable.OfType<IDisposable>())
-                    {
-                        disposable.Dispose();
-                    }
-                }
+                _disposables.Dispose();
             }
 
             this.RaisePropertyChanged("IsDisposed");
         }
 
         #endregion
+
+        protected void AddDisposable(IDisposable disposable)
+        {
+            _disposables.Add(disposable);
+        }
+
+        protected void AddDisposables(IEnumerable<IDisposable> disposables)
+        {
+            foreach (var disposable in disposables)
+            {
+                _disposables.Add(disposable);
+            }
+        }
     }
 }

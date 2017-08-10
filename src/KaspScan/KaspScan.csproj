@@ -126,6 +126,7 @@
     <Compile Include="Converters\Cases\ICase.cs" />
     <Compile Include="Converters\ChainConverter.cs" />
     <Compile Include="Converters\SwitchConverter.cs" />
+    <Compile Include="Extensions\ObservableAsPropertyHelperExtensions.cs" />
     <Compile Include="Helpers\Booleans.cs" />
     <Compile Include="Helpers\NumeralsHelpers.cs" />
     <Compile Include="Helpers\RandomHelper.cs" />

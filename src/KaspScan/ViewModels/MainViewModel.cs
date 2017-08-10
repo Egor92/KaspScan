@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows.Input;
-using Egor92.CollectionExtensions;
 using KaspScan.Enums;
+using KaspScan.Extensions;
 using KaspScan.Helpers;
 using KaspScan.Managers;
 using KaspScan.Model;
@@ -28,22 +28,6 @@ namespace KaspScan.ViewModels
             : base(schedulers)
         {
             _scanningManager = scanningManager;
-
-            Initialize();
-        }
-
-        private void Initialize()
-        {
-            Disposables.AddRange(new[]
-            {
-                InitializeLastScanningTimeProperty(),
-                InitializeProgressProperty(),
-                InitializeIsReportsButtonVisibleProperty(),
-                InitializeBoldMessageProperty(),
-                InitializeThinMessageProperty(),
-                InitializeScanningResultProperty(),
-                InitializeIsScanningProgressVisibleProperty(),
-            });
         }
 
         #endregion
@@ -56,7 +40,7 @@ namespace KaspScan.ViewModels
 
         public TimeSpan? LastScanningTime
         {
-            get { return _lastScanningTime.Value; }
+            get { return _lastScanningTime.GetValueOrDefault(); }
         }
 
         private IDisposable InitializeLastScanningTimeProperty()
@@ -73,7 +57,7 @@ namespace KaspScan.ViewModels
 
         public double Progress
         {
-            get { return _progress.Value; }
+            get { return _progress.GetValueOrDefault(); }
         }
 
         private IDisposable InitializeProgressProperty()
@@ -91,7 +75,7 @@ namespace KaspScan.ViewModels
 
         public string BoldMessage
         {
-            get { return _boldMessage.Value; }
+            get { return _boldMessage.GetValueOrDefault("Рекомендуется запустить проверку"); }
         }
 
         private IDisposable InitializeBoldMessageProperty()
@@ -138,7 +122,7 @@ namespace KaspScan.ViewModels
 
         public string ThinMessage
         {
-            get { return _thinMessage.Value; }
+            get { return _thinMessage.GetValueOrDefault("Проверка ещё не запускалась"); }
         }
 
         private IDisposable InitializeThinMessageProperty()
@@ -193,7 +177,7 @@ namespace KaspScan.ViewModels
 
         public bool IsReportsButtonVisible
         {
-            get { return _isReportsButtonVisible.Value; }
+            get { return _isReportsButtonVisible.GetValueOrDefault(); }
         }
 
         private IDisposable InitializeIsReportsButtonVisibleProperty()
@@ -216,7 +200,7 @@ namespace KaspScan.ViewModels
 
         public ScanningResult ScanningResult
         {
-            get { return _scanningResult.Value; }
+            get { return _scanningResult.GetValueOrDefault(); }
         }
 
         private IDisposable InitializeScanningResultProperty()
@@ -253,7 +237,7 @@ namespace KaspScan.ViewModels
 
         public bool IsScanningProgressVisible
         {
-            get { return _isScanningProgressVisible.Value; }
+            get { return _isScanningProgressVisible.GetValueOrDefault(); }
         }
 
         private IDisposable InitializeIsScanningProgressVisibleProperty()
@@ -288,8 +272,9 @@ namespace KaspScan.ViewModels
 
         private ICommand GetStartScanningCommand()
         {
-            return ReactiveCommand.Create(StartScanning)
-                                  .DisposeWith(Disposables);
+            var command = ReactiveCommand.Create(StartScanning);
+            AddDisposable(command);
+            return command;
         }
 
         private void StartScanning()
@@ -305,5 +290,16 @@ namespace KaspScan.ViewModels
         #endregion
 
         #endregion
+
+        protected override IEnumerable<IDisposable> GetSubscriptionsOnActivation()
+        {
+            yield return InitializeLastScanningTimeProperty();
+            yield return InitializeProgressProperty();
+            yield return InitializeIsReportsButtonVisibleProperty();
+            yield return InitializeBoldMessageProperty();
+            yield return InitializeThinMessageProperty();
+            yield return InitializeScanningResultProperty();
+            yield return InitializeIsScanningProgressVisibleProperty();
+        }
     }
 }
