@@ -12,10 +12,11 @@ namespace KaspScan.Model
         private readonly object _syncRoot = new object();
         private IDisposable _intervalSubscription;
         private readonly TimeSpan _algorithmStepInterval = TimeSpan.FromMilliseconds(10);
-        private const long MaxAlgorithmStep = 500;
-        private long _currentAlgorithmStep;
+        private const long TotalStepCount = 500;
+        private long _currentStepIndex;
         private bool _generateWarnings;
         private int _warningCount;
+        private static readonly FileScannedInfo DefaultFileScannedInfo = new FileScannedInfo(AlgorithmStatus.NotRunned, 0.0, null, 0);
 
         #endregion
 
@@ -31,13 +32,13 @@ namespace KaspScan.Model
 
         #region Events
 
-        #region StepPassed
+        #region FileScanned
 
-        private readonly ReplaySubject<ScanningAlgorithmStepInfo> _stepPassed = new ReplaySubject<ScanningAlgorithmStepInfo>();
+        private readonly BehaviorSubject<FileScannedInfo> _fileScanned = new BehaviorSubject<FileScannedInfo>(DefaultFileScannedInfo);
 
-        public IObservable<ScanningAlgorithmStepInfo> StepPassed
+        public IObservable<FileScannedInfo> FileScanned
         {
-            get { return _stepPassed.AsObservable(); }
+            get { return _fileScanned.AsObservable(); }
         }
 
         #endregion
@@ -50,7 +51,7 @@ namespace KaspScan.Model
         {
             Stop();
             _intervalSubscription?.Dispose();
-            _stepPassed?.Dispose();
+            _fileScanned?.Dispose();
         }
 
         #endregion
@@ -65,7 +66,7 @@ namespace KaspScan.Model
                     return;
 
                 Status = AlgorithmStatus.Running;
-                _currentAlgorithmStep = 0;
+                _currentStepIndex = 0;
                 _warningCount = 0;
                 _generateWarnings = RandomHelper.GetBool();
                 _intervalSubscription = Observable.Interval(_algorithmStepInterval)
@@ -101,20 +102,20 @@ namespace KaspScan.Model
 
         private void OnNextAlgorithmStep(long l)
         {
-            _currentAlgorithmStep++;
-            var progress = (double) _currentAlgorithmStep / MaxAlgorithmStep * 100;
+            _currentStepIndex++;
+            var progress = (double) _currentStepIndex / TotalStepCount * 100;
             var actualScanningFileName = RandomStringHelper.GetWord(5, 15);
             if (_generateWarnings && RandomHelper.GetBool(0.01))
             {
                 _warningCount++;
             }
-            _stepPassed.OnNext(new ScanningAlgorithmStepInfo(Status, progress, actualScanningFileName, _warningCount));
+            _fileScanned.OnNext(new FileScannedInfo(Status, progress, actualScanningFileName, _warningCount));
 
-            if (_currentAlgorithmStep >= MaxAlgorithmStep)
+            if (_currentStepIndex >= TotalStepCount)
             {
                 _intervalSubscription.Dispose();
                 Status = AlgorithmStatus.Finished;
-                _stepPassed.OnNext(new ScanningAlgorithmStepInfo(Status, progress, null, _warningCount));
+                _fileScanned.OnNext(new FileScannedInfo(Status, progress, null, _warningCount));
             }
         }
     }

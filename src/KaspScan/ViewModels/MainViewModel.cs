@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Reactive.Linq;
 using System.Windows.Input;
 using KaspScan.Enums;
@@ -62,7 +61,7 @@ namespace KaspScan.ViewModels
 
         private IDisposable InitializeProgressProperty()
         {
-            return _progress = _scanningManager.StepPassed.Where(_ => IsActive)
+            return _progress = _scanningManager.FileScanned.Where(_ => IsActive)
                                                .Select(y => y.Progress)
                                                .ToProperty(this, x => x.Progress);
         }
@@ -71,27 +70,21 @@ namespace KaspScan.ViewModels
 
         #region BoldMessage
 
-        private ObservableAsPropertyHelper<string> _boldMessage;
+        private string _boldMessage;
 
         public string BoldMessage
         {
-            get { return _boldMessage.GetValueOrDefault("Рекомендуется запустить проверку"); }
+            get { return _boldMessage; }
+            private set { this.RaiseAndSetIfChanged(ref _boldMessage, value); }
         }
 
-        private IDisposable InitializeBoldMessageProperty()
+        private IDisposable SubscribeToBoldMessageUpdating()
         {
-            return _boldMessage = _scanningManager.StepPassed.Where(_ => IsActive)
-                                                  .Select(GetBoldMessage)
-                                                  .ToProperty(this, x => x.BoldMessage, GetBoldMessage());
+            return _scanningManager.FileScanned.Select(GetBoldMessage)
+                                   .Subscribe(UpdateBoldMessage);
         }
 
-        private string GetBoldMessage()
-        {
-            var stepInfo = new ScanningAlgorithmStepInfo(_scanningManager.Status, 0.0, null, 0);
-            return GetBoldMessage(stepInfo);
-        }
-
-        private string GetBoldMessage(ScanningAlgorithmStepInfo stepInfo)
+        private string GetBoldMessage(FileScannedInfo fileScannedInfo)
         {
             switch (_scanningManager.Status)
             {
@@ -100,63 +93,62 @@ namespace KaspScan.ViewModels
                 case AlgorithmStatus.Running:
                 case AlgorithmStatus.Paused:
                 case AlgorithmStatus.Stopped:
-                    var problemWord = NumeralsHelpers.GetFeminineWordInNominativeCase("проблем", stepInfo.WarningCount);
-                    return $"В результате проверки найдено {stepInfo.WarningCount} {problemWord}";
+                    var problemWord = NumeralsHelpers.GetFeminineWordInNominativeCase("проблем", fileScannedInfo.WarningCount);
+                    return $"В результате проверки найдено {fileScannedInfo.WarningCount} {problemWord}";
                 case AlgorithmStatus.Finished:
-                    if (stepInfo.WarningCount == 0)
+                    if (fileScannedInfo.WarningCount == 0)
                         return "Проблем не убнаружено. Рекомендуется установить защиту";
 
-                    problemWord = NumeralsHelpers.GetFeminineWordInNominativeCase("проблем", stepInfo.WarningCount);
-                    return $"В результате проверки найдено {stepInfo.WarningCount} {problemWord}";
+                    problemWord = NumeralsHelpers.GetFeminineWordInNominativeCase("проблем", fileScannedInfo.WarningCount);
+                    return $"В результате проверки найдено {fileScannedInfo.WarningCount} {problemWord}";
 
                 default:
                     throw new Exception($"Unhandled case with {_scanningManager.Status}");
             }
         }
 
+        private void UpdateBoldMessage(string value)
+        {
+            BoldMessage = value;
+        }
+
         #endregion
 
         #region ThinMessage
 
-        private ObservableAsPropertyHelper<string> _thinMessage;
+        private string _thinMessage;
 
         public string ThinMessage
         {
-            get { return _thinMessage.GetValueOrDefault("Проверка ещё не запускалась"); }
+            get { return _thinMessage; }
+            private set { this.RaiseAndSetIfChanged(ref _thinMessage, value); }
         }
 
-        private IDisposable InitializeThinMessageProperty()
+        private IDisposable SubscribeToThinMessageUpdating()
         {
-            Expression<Func<MainViewModel, IObservable<ScanningAlgorithmStepInfo>>> stepPassedChanged =
-                x => x._scanningManager.StepPassed;
-            Expression<Func<MainViewModel, IObservable<TimeSpan?>>> lastScanningTimeChanged =
-                x => x._scanningManager.LastScanningTimeChanged;
-            return _thinMessage = this.WhenAnyObservable(stepPassedChanged, lastScanningTimeChanged,
-                                                         (x1, x2) => new Tuple<ScanningAlgorithmStepInfo, TimeSpan?>(x1, x2))
-                                      .Where(_ => IsActive)
-                                      .Select(GetThinMessage)
-                                      .ToProperty(this, x => x.ThinMessage, GetThinMessage());
+            var fileScanned = _scanningManager.FileScanned;
+            var lastScanningTimeChanged = _scanningManager.LastScanningTimeChanged;
+
+            return Observable.CombineLatest(fileScanned, lastScanningTimeChanged,
+                                            (x1, x2) => new Tuple<FileScannedInfo, TimeSpan?>(x1, x2))
+                             .Select(GetThinMessage)
+                             .Subscribe(UpdateThinMessage);
         }
 
-        private string GetThinMessage()
+        private static string GetThinMessage(Tuple<FileScannedInfo, TimeSpan?> tuple)
         {
-            var algorithmStatus = new ScanningAlgorithmStepInfo(_scanningManager.Status, Progress, null, 0);
-            TimeSpan? lastScanningTime = null;
-            var tuple = new Tuple<ScanningAlgorithmStepInfo, TimeSpan?>(algorithmStatus, lastScanningTime);
-            return GetThinMessage(tuple);
-        }
-
-        private static string GetThinMessage(Tuple<ScanningAlgorithmStepInfo, TimeSpan?> tuple)
-        {
-            var stepInfo = tuple.Item1;
+            var fileScannedInfo = tuple.Item1;
             var timeSpan = tuple.Item2;
 
-            if (stepInfo.Status == AlgorithmStatus.NotRunned || timeSpan == null)
+            if (fileScannedInfo.Status == AlgorithmStatus.NotRunned)
                 return "Проверка ещё не запускалась";
 
-            if (stepInfo.Status == AlgorithmStatus.Running ||
-                stepInfo.Status == AlgorithmStatus.Paused ||
-                stepInfo.Status == AlgorithmStatus.Stopped)
+            if (fileScannedInfo.Status == AlgorithmStatus.Running ||
+                fileScannedInfo.Status == AlgorithmStatus.Paused ||
+                fileScannedInfo.Status == AlgorithmStatus.Stopped)
+                return null;
+
+            if (timeSpan == null)
                 return null;
 
             var lastScanningTime = timeSpan.Value;
@@ -167,6 +159,11 @@ namespace KaspScan.ViewModels
             var seconds = lastScanningTime.Seconds;
             var secondsWord = NumeralsHelpers.GetFeminineWordInDativeCase("секунд", seconds);
             return $"Последняя проверка компьютера: {hours} {hoursWord} {minutes} {minutesWord} {seconds} {secondsWord} назад";
+        }
+
+        private void UpdateThinMessage(string value)
+        {
+            ThinMessage = value;
         }
 
         #endregion
@@ -182,14 +179,13 @@ namespace KaspScan.ViewModels
 
         private IDisposable InitializeIsReportsButtonVisibleProperty()
         {
-            return _isReportsButtonVisible = _scanningManager.StepPassed.Select(_ => GetIsReportsButtonVisible())
-                                                             .ToProperty(this, x => x.IsReportsButtonVisible,
-                                                                         GetIsReportsButtonVisible());
+            return _isReportsButtonVisible = _scanningManager.FileScanned.Select(GetIsReportsButtonVisible)
+                                                             .ToProperty(this, x => x.IsReportsButtonVisible);
         }
 
-        private bool GetIsReportsButtonVisible()
+        private static bool GetIsReportsButtonVisible(FileScannedInfo fileScannedInfo)
         {
-            return _scanningManager.Status != AlgorithmStatus.NotRunned;
+            return fileScannedInfo.Status != AlgorithmStatus.NotRunned;
         }
 
         #endregion
@@ -205,25 +201,19 @@ namespace KaspScan.ViewModels
 
         private IDisposable InitializeScanningResultProperty()
         {
-            return _scanningResult = _scanningManager.StepPassed.Select(GetScanningResult)
-                                                     .ToProperty(this, x => x.ScanningResult, GetScanningResult());
+            return _scanningResult = _scanningManager.FileScanned.Select(GetScanningResult)
+                                                     .ToProperty(this, x => x.ScanningResult);
         }
 
-        private ScanningResult GetScanningResult()
+        private static ScanningResult GetScanningResult(FileScannedInfo fileScannedInfo)
         {
-            var stepInfo = new ScanningAlgorithmStepInfo(_scanningManager.Status, Progress, null, 0);
-            return GetScanningResult(stepInfo);
-        }
-
-        private ScanningResult GetScanningResult(ScanningAlgorithmStepInfo stepInfo)
-        {
-            if (stepInfo.Status == AlgorithmStatus.NotRunned)
+            if (fileScannedInfo.Status == AlgorithmStatus.NotRunned)
                 return ScanningResult.NotRunned;
 
-            if (stepInfo.Status != AlgorithmStatus.Finished)
+            if (fileScannedInfo.Status != AlgorithmStatus.Finished)
                 return ScanningResult.Running;
 
-            if (stepInfo.WarningCount == 0)
+            if (fileScannedInfo.WarningCount == 0)
                 return ScanningResult.HasNoWarnings;
 
             return ScanningResult.HasWarnings;
@@ -242,19 +232,13 @@ namespace KaspScan.ViewModels
 
         private IDisposable InitializeIsScanningProgressVisibleProperty()
         {
-            return _isScanningProgressVisible = _scanningManager.StepPassed.Select(GetIsScanningProgressVisible)
-                                                                .ToProperty(this, x => x.IsScanningProgressVisible,
-                                                                            GetIsScanningProgressVisible());
+            return _isScanningProgressVisible = _scanningManager.FileScanned.Select(GetIsScanningProgressVisible)
+                                                                .ToProperty(this, x => x.IsScanningProgressVisible);
         }
 
-        private bool GetIsScanningProgressVisible()
+        private static bool GetIsScanningProgressVisible(FileScannedInfo fileScannedInfo)
         {
-            return _scanningManager.Status != AlgorithmStatus.NotRunned;
-        }
-
-        private bool GetIsScanningProgressVisible(ScanningAlgorithmStepInfo stepInfo)
-        {
-            return stepInfo.Status != AlgorithmStatus.NotRunned;
+            return fileScannedInfo.Status != AlgorithmStatus.NotRunned;
         }
 
         #endregion
@@ -291,15 +275,19 @@ namespace KaspScan.ViewModels
 
         #endregion
 
+        #region Overridden members
+
         protected override IEnumerable<IDisposable> GetSubscriptionsOnActivation()
         {
             yield return InitializeLastScanningTimeProperty();
             yield return InitializeProgressProperty();
             yield return InitializeIsReportsButtonVisibleProperty();
-            yield return InitializeBoldMessageProperty();
-            yield return InitializeThinMessageProperty();
+            yield return SubscribeToBoldMessageUpdating();
+            yield return SubscribeToThinMessageUpdating();
             yield return InitializeScanningResultProperty();
             yield return InitializeIsScanningProgressVisibleProperty();
         }
+
+        #endregion
     }
 }

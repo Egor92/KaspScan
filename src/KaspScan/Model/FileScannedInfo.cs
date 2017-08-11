@@ -1,8 +1,8 @@
 ﻿namespace KaspScan.Model
 {
-    public class ScanningAlgorithmStepInfo
+    public class FileScannedInfo
     {
-        public ScanningAlgorithmStepInfo(AlgorithmStatus status, double progress, string actualScanningFileName, int warningCount)
+        public FileScannedInfo(AlgorithmStatus status, double progress, string actualScanningFileName, int warningCount)
         {
             Status = status;
             Progress = progress;

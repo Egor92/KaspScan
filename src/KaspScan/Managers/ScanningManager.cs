@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using Egor92.CollectionExtensions;
 using KaspScan.Model;
 using KaspScan.ViewModels.Base;
 
@@ -13,7 +10,7 @@ namespace KaspScan.Managers
     {
         AlgorithmStatus Status { get; }
 
-        IObservable<ScanningAlgorithmStepInfo> StepPassed { get; }
+        IObservable<FileScannedInfo> FileScanned { get; }
 
         IObservable<TimeSpan?> LastScanningTimeChanged { get; }
 
@@ -40,8 +37,8 @@ namespace KaspScan.Managers
             AddDisposables(new[]
             {
                 _scanningAlgorithm,
-                _scanningAlgorithm.StepPassed.Subscribe(OnStepPassed),
-                Observable.Interval(TimeSpan.FromMilliseconds(50))
+                _scanningAlgorithm.FileScanned.Subscribe(OnFileScanned),
+                Observable.Interval(TimeSpan.FromSeconds(1))
                           .Subscribe(OnNextTime),
             });
         }
@@ -63,22 +60,22 @@ namespace KaspScan.Managers
 
         #region Events
 
-        #region StepPassed
+        #region FileScanned
 
-        public IObservable<ScanningAlgorithmStepInfo> StepPassed
+        public IObservable<FileScannedInfo> FileScanned
         {
-            get { return _scanningAlgorithm.StepPassed; }
+            get { return _scanningAlgorithm.FileScanned; }
         }
 
         #endregion
 
         #region LastScanningTimeChanged
 
-        private readonly Subject<TimeSpan?> _lastScanningTimeChanged = new Subject<TimeSpan?>();
+        private readonly BehaviorSubject<TimeSpan?> _lastScanningTimeChanged = new BehaviorSubject<TimeSpan?>(null);
 
         public IObservable<TimeSpan?> LastScanningTimeChanged
         {
-            get { return _lastScanningTimeChanged.AsObservable(); }
+            get { return _lastScanningTimeChanged.DistinctUntilChanged(); }
         }
 
         #endregion
@@ -120,15 +117,26 @@ namespace KaspScan.Managers
         private void OnNextTime(long arg)
         {
             if (_lastScanningFinishTime == null)
-                return;
-
-            var lastScanningTimeHasPassed = DateTime.Now - _lastScanningFinishTime;
-            _lastScanningTimeChanged.OnNext(lastScanningTimeHasPassed);
+            {
+                _lastScanningTimeChanged.OnNext(null);
+            }
+            else
+            {
+                var lastScanningTimeHasPassed = DateTime.Now - _lastScanningFinishTime;
+                _lastScanningTimeChanged.OnNext(lastScanningTimeHasPassed);
+            }
         }
 
-        private void OnStepPassed(ScanningAlgorithmStepInfo stepInfo)
+        private void OnFileScanned(FileScannedInfo fileScannedInfo)
         {
-            _lastScanningFinishTime = DateTime.Now;
+            if (fileScannedInfo.Status == AlgorithmStatus.Finished)
+            {
+                _lastScanningFinishTime = DateTime.Now;
+            }
+            else
+            {
+                _lastScanningFinishTime = null;
+            }
         }
     }
 }
